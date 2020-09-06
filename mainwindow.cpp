@@ -7,6 +7,7 @@
 #include <QDomDocument>
 #include <QGraphicsEllipseItem>
 #include <QColorDialog>
+#include <QDateTime>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -25,6 +26,9 @@ MainWindow::MainWindow(QWidget *parent) :
     scene = new QGraphicsScene;
     scene->setSceneRect(ui->graphicsView->rect());
     ui->graphicsView->setScene(scene);
+
+    connect(ui->treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(treeWidgetItemSelectionChanged()));
+    connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(treeWidgetItemChanged(QTreeWidgetItem*, int)));
 }
 
 MainWindow::~MainWindow()
@@ -83,12 +87,17 @@ void MainWindow::add(QString filePath)
     }
     file.close();
 
+    QDateTime dateTime = QDateTime::currentDateTime();
+    QString sItemID = dateTime.toString("yyyyMMddhhmmsszzz");
+
     QTreeWidgetItem *TWI_root = new QTreeWidgetItem(ui->treeWidget);
-    TWI_root->setText(0, QFileInfo(filePath).fileName());
     TWI_root->setIcon(0, QIcon::fromTheme("application-gpx+xml", QIcon(":/HTYMap.png")));
+    TWI_root->setData(0, ITEMID, sItemID);
+    TWI_root->setCheckState(0, Qt::Checked);
 
     QDomElement root = doc.documentElement();
     QDomNodeList DNL = root.elementsByTagName("trkpt");
+    TWI_root->setText(0, QFileInfo(filePath).fileName() + "(" + QString::number(DNL.count()) + ")");
     QPainterPath PP;
     qreal lonc=0, latc=0;
     for (int i=0; i<DNL.count(); i++) {
@@ -106,16 +115,17 @@ void MainWindow::add(QString filePath)
             } else {
                 qreal x = (lon - lonc) * 10000;
                 qreal y = - (lat - latc) * 10000;
-                qDebug() << QString("%1").arg(x, 0, 'f', 14) << "," << QString("%1").arg(y, 0, 'f', 14);
+                //qDebug() << QString("%1").arg(x, 0, 'f', 14) << "," << QString("%1").arg(y, 0, 'f', 14);
                 PP.lineTo(x, y);
             }
         }
-    }
+    }    
     QPalette plt = toolButton_colorBorder->palette();
     QColor color = plt.color(QPalette::ButtonText);
     QPen pen(color, 1);
     QGraphicsPathItem *GPI = scene->addPath(PP, pen);
     GPI->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+    GPI->setData(ITEMID, sItemID);
 }
 
 void MainWindow::on_action_zoomout_triggered()
@@ -156,5 +166,38 @@ void MainWindow::setColorBorder()
         }
         QRgb rgb = qRgb(color.red(), color.green(), color.blue());
         ui->statusBar->showMessage("轨迹颜色改为 " + QString::number(rgb,16));
+    }
+}
+
+void MainWindow::treeWidgetItemSelectionChanged()
+{
+    scene->clearSelection();
+    QList<QTreeWidgetItem*> list_TWI = ui->treeWidget->selectedItems();
+    QList<QGraphicsItem*> list_GI = scene->items();
+    for (int i=0; i<list_GI.length(); i++) {
+        for(int j=0; j<list_TWI.length(); j++) {
+            QString sItemId = list_TWI.at(j)->data(0, ITEMID).toString();
+            QString sItemId1 = list_GI.at(i)->data(ITEMID).toString();
+            if (sItemId == sItemId1){
+                list_GI.at(i)->setSelected(true);
+            }
+        }
+    }
+}
+
+void MainWindow::treeWidgetItemChanged(QTreeWidgetItem *TWI, int column)
+{
+    Q_UNUSED(column);
+    QList<QGraphicsItem*> list_GI = scene->items();
+    for (int i=0; i<list_GI.length(); i++) {
+        QString sItemId = TWI->data(0, ITEMID).toString();
+        QString sItemId1 = list_GI.at(i)->data(ITEMID).toString();
+        if (sItemId == sItemId1){
+            if (TWI->checkState(0) == Qt::Checked){
+                list_GI.at(i)->setVisible(true);
+            } else {
+                list_GI.at(i)->setVisible(false);
+            }
+        }
     }
 }

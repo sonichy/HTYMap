@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QToolButton>
+#include <QTreeWidgetItem>
 
 namespace Ui {
 class MainWindow;
@@ -24,6 +25,7 @@ private:
     QGraphicsScene *scene;
     void open(QString filePath);
     void add(QString filePath);
+    int ITEMID = Qt::UserRole + 1;
 
 private slots:
     void on_action_open_project_triggered();
@@ -35,6 +37,8 @@ private slots:
     void on_action_zoomin_triggered();
     void on_action_zoomout_triggered();
     void setColorBorder();
+    void treeWidgetItemSelectionChanged();
+    void treeWidgetItemChanged(QTreeWidgetItem *TWI, int column);
 
 };
 
