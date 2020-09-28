@@ -19,6 +19,21 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
@@ -34,7 +49,11 @@
         </property>
        </column>
       </widget>
-      <widget class="QGraphicsView" name="graphicsView"/>
+      <widget class="QGraphicsView" name="graphicsView">
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -55,6 +74,7 @@
     <addaction name="action_new_project"/>
     <addaction name="action_open_project"/>
     <addaction name="action_save_project"/>
+    <addaction name="action_save_image"/>
     <addaction name="action_import"/>
     <addaction name="action_quit"/>
    </widget>
@@ -85,6 +105,10 @@
    </attribute>
    <addaction name="action_zoomin"/>
    <addaction name="action_zoomout"/>
+   <addaction name="action_moveUp"/>
+   <addaction name="action_moveDown"/>
+   <addaction name="action_moveLeft"/>
+   <addaction name="action_moveRight"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="action_open_project">
@@ -174,7 +198,7 @@
     <string>放大</string>
    </property>
    <property name="shortcut">
-    <string>=</string>
+    <string>+</string>
    </property>
   </action>
   <action name="action_zoomout">
@@ -200,6 +224,47 @@
   <action name="action_colorBorder">
    <property name="text">
     <string>□</string>
+   </property>
+  </action>
+  <action name="action_moveUp">
+   <property name="text">
+    <string>↑ </string>
+   </property>
+   <property name="shortcut">
+    <string>Up</string>
+   </property>
+  </action>
+  <action name="action_moveDown">
+   <property name="text">
+    <string>↓</string>
+   </property>
+   <property name="shortcut">
+    <string>Down</string>
+   </property>
+  </action>
+  <action name="action_moveLeft">
+   <property name="text">
+    <string>←</string>
+   </property>
+   <property name="shortcut">
+    <string>Left</string>
+   </property>
+  </action>
+  <action name="action_moveRight">
+   <property name="text">
+    <string>→</string>
+   </property>
+   <property name="shortcut">
+    <string>Right</string>
+   </property>
+  </action>
+  <action name="action_save_image">
+   <property name="icon">
+    <iconset theme="image">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>保存图像</string>
    </property>
   </action>
  </widget>
