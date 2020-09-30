@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "tileitem.h"
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QToolButton>
@@ -33,6 +34,8 @@ private:
     int R = 6378137;//赤道半径米
     void drawTiles(double lgt, double ltt, int z);
     void save(QString filepath);
+    void initTiles();
+    QList<TileItem*> list_tileItem;
 
 private slots:
     void on_action_open_project_triggered();

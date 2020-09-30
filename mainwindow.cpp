@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "tileitem.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QTextStream>
@@ -35,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(treeWidgetItemSelectionChanged()));
     connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(treeWidgetItemChanged(QTreeWidgetItem*, int)));
 
-    drawTiles(lgt, ltt, z);
+    initTiles();
 }
 
 MainWindow::~MainWindow()
@@ -268,15 +267,15 @@ void MainWindow::treeWidgetItemChanged(QTreeWidgetItem *TWI, int column)
 
 void MainWindow::drawTiles(double lgt, double ltt, int z)
 {
-    scene->clear();
+    //scene->clear();
     ui->statusBar->showMessage("缩放：" + QString::number(z));    
     int c = static_cast<int>(2 * M_PI * R);
     qDebug() << "c" << c;
     int xo = - c / 2;
     int yo = c / 2;
     qDebug() << "xo, yo" << xo << yo;
-    int cols = static_cast<int>(qPow(2,z));
-    mpp = c / cols / 256;
+    int tcols = static_cast<int>(qPow(2,z));
+    mpp = c / tcols / 256;
     lgt = lgt * M_PI / 180;
     ltt = ltt * M_PI / 180;
     int x1 = static_cast<int>(R * lgt);
@@ -285,24 +284,42 @@ void MainWindow::drawTiles(double lgt, double ltt, int z)
     int dx = x1 - xo;
     int dy = yo - y1;
     qDebug() << "dx, dy" << dx << dy;
-    int x = static_cast<int>(static_cast<long>(dx) * cols / c);
-    int y = static_cast<int>(static_cast<long>(dy) * cols / c);
+    int x = static_cast<int>(static_cast<long>(dx) * tcols / c);
+    int y = static_cast<int>(static_cast<long>(dy) * tcols / c);
     qDebug() << "x, y" << x << y;
     QString surl = "http://mt3.google.cn/vt/lyrs=y&hl=zh-CN&gl=CN&x=%1&y=%2&z=%3";
-    int yi = 0;
-    int cc = 1;
+    //int yi = 0;
+    int cc = 0;
     for (int j=y; j<y+4; j++) { //左上角-+移动到中心
-        int xi = 0;
+        //int xi = 0;
         for (int i=x-3; i<x+5; i++) {
             QString surl1 = surl.arg(QString::number(i)).arg(QString::number(j)).arg(QString::number(z));
             //qDebug() << surl1;
-            TileItem *tileItem = new TileItem(surl1);
-            scene->addItem(tileItem);
+            //TileItem *tileItem = new TileItem(surl1);
+            //scene->addItem(tileItem);
             //qDebug() << "pos: " << xi << yi;
-            tileItem->setPos(xi, yi);
-            xi += 256;
+            //tileItem->setPos(xi, yi);
+            //xi += 256;
+            list_tileItem.at(cc)->setPixmapFormUrl(surl1);
             cc++;
         }
-        yi += 256;
+        //yi += 256;
     }
+}
+
+void MainWindow::initTiles()
+{
+    int cc = 0;
+    for (int y=0; y<4*256; y+=256) {
+        for (int x=0; x<8*256; x+=256) {
+            TileItem *tileItem = new TileItem;
+            scene->addItem(tileItem);
+            //qDebug() << "pos: " << x << y;
+            tileItem->setPos(x, y);
+            list_tileItem.append(tileItem);
+            cc++;
+        }
+    }
+    qDebug() << cc;
+    drawTiles(lgt, ltt, z);
 }
