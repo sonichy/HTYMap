@@ -23,14 +23,21 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(toolButton_colorBorder, SIGNAL(clicked()), this, SLOT(setColorBorder()));
     ui->mainToolBar->addWidget(toolButton_colorBorder);
 
-    ui->treeWidget->setHeaderLabel("图层");
-    ui->treeWidget->hide();
+    ui->treeWidget->setHeaderLabel("图层");    
     ui->splitter->setStretchFactor(0,2);
     ui->splitter->setStretchFactor(1,8);
+    ui->treeWidget->hide();
     scene = new QGraphicsScene;
     scene->setSceneRect(0, 0, 256 * 7, 256 * 4);    //根据瓦片大小和数目设置
     ui->graphicsView->setScene(scene);    
 
+    connect(ui->action_side, &QAction::triggered, [=](bool b){
+        if (b) {
+            ui->treeWidget->show();
+        } else {
+            ui->treeWidget->hide();
+        }
+    });
     connect(ui->treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(treeWidgetItemSelectionChanged()));
     connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(treeWidgetItemChanged(QTreeWidgetItem*, int)));
 
@@ -267,7 +274,6 @@ void MainWindow::treeWidgetItemChanged(QTreeWidgetItem *TWI, int column)
 
 void MainWindow::drawTiles(double lgt, double ltt, int z)
 {
-    //scene->clear();
     ui->statusBar->showMessage("缩放：" + QString::number(z));    
     int c = static_cast<int>(2 * M_PI * R);
     qDebug() << "c" << c;
@@ -291,19 +297,11 @@ void MainWindow::drawTiles(double lgt, double ltt, int z)
     //int yi = 0;
     int cc = 0;
     for (int j=y; j<y+4; j++) { //左上角-+移动到中心
-        //int xi = 0;
         for (int i=x-3; i<x+5; i++) {
             QString surl1 = surl.arg(QString::number(i)).arg(QString::number(j)).arg(QString::number(z));
-            //qDebug() << surl1;
-            //TileItem *tileItem = new TileItem(surl1);
-            //scene->addItem(tileItem);
-            //qDebug() << "pos: " << xi << yi;
-            //tileItem->setPos(xi, yi);
-            //xi += 256;
             list_tileItem.at(cc)->setPixmapFormUrl(surl1);
             cc++;
         }
-        //yi += 256;
     }
 }
 

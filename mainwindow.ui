@@ -40,6 +40,12 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QTreeWidget" name="treeWidget">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="selectionMode">
         <enum>QAbstractItemView::ContiguousSelection</enum>
        </property>
@@ -50,6 +56,12 @@
        </column>
       </widget>
       <widget class="QGraphicsView" name="graphicsView">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>8</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
        </property>
@@ -103,6 +115,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="action_side"/>
    <addaction name="action_zoomin"/>
    <addaction name="action_zoomout"/>
    <addaction name="action_moveUp"/>
@@ -265,6 +278,14 @@
    </property>
    <property name="text">
     <string>保存图像</string>
+   </property>
+  </action>
+  <action name="action_side">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>≡</string>
    </property>
   </action>
  </widget>
