@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>HTYMap.png</file>
         <file>marker.png</file>
+        <file>layer.png</file>
     </qresource>
 </RCC>

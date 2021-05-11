@@ -9,7 +9,7 @@
 #include <QColorDialog>
 #include <QDateTime>
 #include <QtMath>
-#include <QDesktopWidget>
+//#include <QDesktopWidget>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -37,6 +37,9 @@ MainWindow::MainWindow(QWidget *parent) :
         } else {
             ui->treeWidget->hide();
         }
+    });
+    connect(ui->action_refresh,  &QAction::triggered, [=]{
+        drawTiles(lgt, ltt, z);
     });
     connect(ui->treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(treeWidgetItemSelectionChanged()));
     connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(treeWidgetItemChanged(QTreeWidgetItem*, int)));
@@ -76,9 +79,10 @@ void MainWindow::on_action_save_project_triggered()
 
 void MainWindow::on_action_save_image_triggered()
 {
-    if (path=="") path = "./未命名.jpg";
-    path = QFileDialog::getSaveFileName(this, "保存图片", path, "图片文件(*.jpg *.png *.bmp);");
-    if(path.length() != 0){
+    if (path == "")
+        path = "./未命名.png";
+    path = QFileDialog::getSaveFileName(this, "保存图片", path, "图片文件(*.png)");
+    if (path.length() != 0) {
         save(path);
     }
 }
@@ -102,6 +106,8 @@ void MainWindow::open(QString filePath)
 
 void MainWindow::on_action_import_triggered()
 {
+    if (path == "")
+        path = ".";
     path = QFileDialog::getOpenFileName(this, "添加轨迹", path, "地图轨迹 (*.gpx)");
     if (!path.isEmpty()) {
         add(path);
@@ -122,11 +128,11 @@ void MainWindow::add(QString filePath)
     file.close();
 
     QDateTime dateTime = QDateTime::currentDateTime();
-    QString sItemID = dateTime.toString("yyyyMMddhhmmsszzz");
+    QString itemId = dateTime.toString("yyyyMMddhhmmsszzz");
 
     QTreeWidgetItem *TWI_root = new QTreeWidgetItem(ui->treeWidget);
     TWI_root->setIcon(0, QIcon::fromTheme("application-gpx+xml", QIcon(":/HTYMap.png")));
-    TWI_root->setData(0, ITEMID, sItemID);
+    TWI_root->setData(0, ITEMID, itemId);
     TWI_root->setCheckState(0, Qt::Checked);
 
     QDomElement root = doc.documentElement();
@@ -143,7 +149,7 @@ void MainWindow::add(QString filePath)
             QTreeWidgetItem *TWI_point = new QTreeWidgetItem(TWI_root);
             TWI_point->setText(0, QString("%1").arg(lon, 0, 'f', 14) + "," + QString("%1").arg(lat, 0, 'f', 14));
             TWI_point->setIcon(0, QIcon(":/marker.png"));
-            if (i == 0){
+            if (i == 0) {
                 lonc = lon;
                 latc = lat;
             } else {
@@ -158,61 +164,74 @@ void MainWindow::add(QString filePath)
     QColor color = plt.color(QPalette::ButtonText);
     QPen pen(color, 1);
     QGraphicsPathItem *GPI = scene->addPath(PP, pen);
+    GPI->setPos(500, 500);
     GPI->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
-    GPI->setData(ITEMID, sItemID);
+    GPI->setData(ITEMID, itemId);
 }
 
 void MainWindow::on_action_zoomout_triggered()
 {
-    z--;
-    drawTiles(lgt, ltt, z);
+    if (list_surl.length() > 0) {
+        z--;
+        drawTiles(lgt, ltt, z);
+    }
 }
 
 void MainWindow::on_action_zoomin_triggered()
 {
-    z++;
-    drawTiles(lgt, ltt, z);
+    if (list_surl.length() > 0) {
+        z++;
+        drawTiles(lgt, ltt, z);
+    }
 }
 
 void MainWindow::on_action_moveUp_triggered()
-{   
-    int tp = dp * mpp; //点距转米
-    ltt = ltt * M_PI / 180; //角度转弧度
-    ltt = qAtan((R * qTan(ltt) + tp) / R);
-    ltt = 180 * ltt / M_PI;  //弧度转角度
-    drawTiles(lgt, ltt, z);
+{
+    if (list_surl.length() > 0) {
+        int tp = dp * mpp; //点距转米
+        ltt = ltt * M_PI / 180; //角度转弧度
+        ltt = qAtan((R * qTan(ltt) + tp) / R);
+        ltt = 180 * ltt / M_PI;  //弧度转角度
+        drawTiles(lgt, ltt, z);
+    }
 }
 
 void MainWindow::on_action_moveDown_triggered()
-{   
-    int tp = dp * mpp; //点距转米
-    ltt = ltt * M_PI / 180; //角度转弧度
-    ltt = qAtan((R * qTan(ltt) - tp) / R);
-    ltt = 180 * ltt / M_PI;  //弧度转角度
-    drawTiles(lgt, ltt, z);
+{
+    if (list_surl.length() > 0) {
+        int tp = dp * mpp; //点距转米
+        ltt = ltt * M_PI / 180; //角度转弧度
+        ltt = qAtan((R * qTan(ltt) - tp) / R);
+        ltt = 180 * ltt / M_PI;  //弧度转角度
+        drawTiles(lgt, ltt, z);
+    }
 }
 
 void MainWindow::on_action_moveLeft_triggered()
-{    
-    double a = static_cast<double>(dp * mpp) / R;
-    a = 180 * a / M_PI;  //弧度转角度
-    lgt -= a;
-    drawTiles(lgt, ltt, z);
+{
+    if (list_surl.length() > 0) {
+        double a = static_cast<double>(dp * mpp) / R;
+        a = 180 * a / M_PI;  //弧度转角度
+        lgt -= a;
+        drawTiles(lgt, ltt, z);
+    }
 }
 
 void MainWindow::on_action_moveRight_triggered()
-{   
-    double a = static_cast<double>(dp * mpp) / R;
-    a = 180 * a / M_PI;  //弧度转角度
-    lgt += a;
-    drawTiles(lgt, ltt, z);
+{
+    if (list_surl.length() > 0) {
+        double a = static_cast<double>(dp * mpp) / R;
+        a = 180 * a / M_PI;  //弧度转角度
+        lgt += a;
+        drawTiles(lgt, ltt, z);
+    }
 }
 
 void MainWindow::on_action_selectAll_triggered()
 {
     QList<QGraphicsItem*> list_item = scene->items();
     qDebug() << list_item;
-    for(int i=0; i<list_item.size(); i++){
+    for (int i=0; i<list_item.size(); i++) {
         list_item[i]->setSelected(true);        
     }
     ui->statusBar->showMessage("共 " + QString::number(list_item.size()) + " 条轨迹");
@@ -227,8 +246,8 @@ void MainWindow::setColorBorder()
         plt.setColor(QPalette::ButtonText, color);
         toolButton_colorBorder->setPalette(plt);
         QList<QGraphicsItem*> list_item = scene->selectedItems();
-        for(int i=0; i<list_item.size(); i++){
-            if(list_item[i]->type() == QGraphicsPathItem::Type){
+        for (int i=0; i<list_item.size(); i++) {
+            if (list_item[i]->type() == QGraphicsPathItem::Type) {
                 QPen pen(color);
                 QGraphicsPathItem *GPI = qgraphicsitem_cast<QGraphicsPathItem*>(list_item[i]);
                 GPI->setPen(pen);
@@ -245,10 +264,10 @@ void MainWindow::treeWidgetItemSelectionChanged()
     QList<QTreeWidgetItem*> list_TWI = ui->treeWidget->selectedItems();
     QList<QGraphicsItem*> list_GI = scene->items();
     for (int i=0; i<list_GI.length(); i++) {
-        for(int j=0; j<list_TWI.length(); j++) {
-            QString sItemId = list_TWI.at(j)->data(0, ITEMID).toString();
-            QString sItemId1 = list_GI.at(i)->data(ITEMID).toString();
-            if (sItemId == sItemId1){
+        for (int j=0; j<list_TWI.length(); j++) {
+            QString itemId = list_TWI.at(j)->data(0, ITEMID).toString();
+            QString itemId1 = list_GI.at(i)->data(ITEMID).toString();
+            if (itemId == itemId1) {
                 list_GI.at(i)->setSelected(true);
             }
         }
@@ -258,11 +277,11 @@ void MainWindow::treeWidgetItemSelectionChanged()
 void MainWindow::treeWidgetItemChanged(QTreeWidgetItem *TWI, int column)
 {
     Q_UNUSED(column);
+    QString itemId = TWI->data(0, ITEMID).toString();
     QList<QGraphicsItem*> list_GI = scene->items();
     for (int i=0; i<list_GI.length(); i++) {
-        QString sItemId = TWI->data(0, ITEMID).toString();
-        QString sItemId1 = list_GI.at(i)->data(ITEMID).toString();
-        if (sItemId == sItemId1){
+        QString itemId1 = list_GI.at(i)->data(ITEMID).toString();
+        if (itemId == itemId1) {
             if (TWI->checkState(0) == Qt::Checked){
                 list_GI.at(i)->setVisible(true);
             } else {
@@ -293,31 +312,52 @@ void MainWindow::drawTiles(double lgt, double ltt, int z)
     int x = static_cast<int>(static_cast<long>(dx) * tcols / c);
     int y = static_cast<int>(static_cast<long>(dy) * tcols / c);
     qDebug() << "x, y" << x << y;
-    QString surl = "http://mt3.google.cn/vt/lyrs=y&hl=zh-CN&gl=CN&x=%1&y=%2&z=%3";
+
     //int yi = 0;
-    int cc = 0;
-    for (int j=y; j<y+4; j++) { //左上角-+移动到中心
-        for (int i=x-3; i<x+5; i++) {
-            QString surl1 = surl.arg(QString::number(i)).arg(QString::number(j)).arg(QString::number(z));
-            list_tileItem.at(cc)->setPixmapFormUrl(surl1);
-            cc++;
+    qDebug() << list_layer.length();
+    for (int l=0; l<list_layer.length(); l++) {
+        int cc = 0;
+        for (int j=y; j<y+4; j++) { //左上角-+移动到中心
+            for (int i=x-3; i<x+5; i++) {
+                QString surl = list_surl.at(l).arg(QString::number(i)).arg(QString::number(j)).arg(QString::number(z));
+                //qDebug() << "layer" << l << cc << surl;
+                list_layer.at(l).at(cc)->setPixmapFormUrl(surl);
+                cc++;
+            }
         }
     }
 }
 
 void MainWindow::initTiles()
-{
-    int cc = 0;
-    for (int y=0; y<4*256; y+=256) {
-        for (int x=0; x<8*256; x+=256) {
-            TileItem *tileItem = new TileItem;
-            scene->addItem(tileItem);
-            //qDebug() << "pos: " << x << y;
-            tileItem->setPos(x, y);
-            list_tileItem.append(tileItem);
-            cc++;
+{    
+    //list_surl.append("http://mt3.google.cn/vt/lyrs=y&hl=zh-CN&gl=CN&x=%1&y=%2&z=%3");    //谷歌卫星
+    QString surl = "http://t0.tianditu.gov.cn/img_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX=%3&TILEROW=%2&TILECOL=%1&tk=736d78e979b7da008bd4a1222dcf6313";
+    list_surl.append(surl);   //天地图影像
+    surl = "http://t0.tianditu.gov.cn/cia_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cia&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX=%3&TILEROW=%2&TILECOL=%1&tk=736d78e979b7da008bd4a1222dcf6313";
+    list_surl.append(surl);    //天地图影像注记
+    for (int u=0; u<list_surl.length(); u++) {
+        QTreeWidgetItem *TWI_root = new QTreeWidgetItem(ui->treeWidget);
+        TWI_root->setText(0, "图层" + QString::number(u));
+        TWI_root->setIcon(0, QIcon(":/layer.png"));
+        TWI_root->setToolTip(0, "layer" + QString::number(u));
+        TWI_root->setCheckState(0, Qt::Checked);
+        TWI_root->setData(0, ITEMID, "layer" + QString::number(u));
+
+        int cc = 0;
+        QList<TileItem*> list_tileItem;
+        for (int y=0; y<4*256; y+=256) {
+            for (int x=0; x<8*256; x+=256) {
+                TileItem *tileItem = new TileItem;
+                tileItem->setData(ITEMID, "layer" + QString::number(u));
+                scene->addItem(tileItem);
+                //qDebug() << "pos: " << x << y;
+                tileItem->setPos(x, y);
+                list_tileItem.append(tileItem);
+                cc++;
+            }
         }
+        list_layer.append(list_tileItem);
+        qDebug() << cc;
     }
-    qDebug() << cc;
     drawTiles(lgt, ltt, z);
 }

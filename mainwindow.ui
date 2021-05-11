@@ -76,7 +76,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>36</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -122,6 +122,7 @@
    <addaction name="action_moveDown"/>
    <addaction name="action_moveLeft"/>
    <addaction name="action_moveRight"/>
+   <addaction name="action_refresh"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="action_open_project">
@@ -166,7 +167,7 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>关于Qt</string>
+    <string>关于&amp;Qt</string>
    </property>
   </action>
   <action name="action_about">
@@ -286,6 +287,20 @@
    </property>
    <property name="text">
     <string>≡</string>
+   </property>
+  </action>
+  <action name="action_refresh">
+   <property name="icon">
+    <iconset theme="view-refresh"/>
+   </property>
+   <property name="text">
+    <string>refresh</string>
+   </property>
+   <property name="toolTip">
+    <string>刷新</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
    </property>
   </action>
  </widget>

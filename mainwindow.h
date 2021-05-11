@@ -35,7 +35,8 @@ private:
     void drawTiles(double lgt, double ltt, int z);
     void save(QString filepath);
     void initTiles();
-    QList<TileItem*> list_tileItem;
+    QList<QList<TileItem*>> list_layer;
+    QStringList list_surl;
 
 private slots:
     void on_action_open_project_triggered();
